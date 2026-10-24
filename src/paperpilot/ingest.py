@@ -34,5 +34,5 @@ def chunk_pages(pages: list[tuple[int,str]], size:int = 250, overlap: int = 40) 
             chunks.append(Chunk(page=page_num, index=len(chunks), text=chunk_text))
             if end == len(words):
                 break
-            start += size - overlap
+            start += step
     return chunks
