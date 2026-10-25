@@ -10,12 +10,16 @@ class Chunk:
     text: str
 
 
-def extract_pages(pdf_path: str) -> list[tuple[int, str]]:
+def clean_text(text: str) -> str:
+    """Remove characters Postgres TEXT can't store."""
+    return text.replace("\x00", "")
 
+
+def extract_pages(pdf_path: str) -> list[tuple[int, str]]:
     pages = []
     with pymupdf.open(pdf_path) as doc:
         for i, page in enumerate(doc):
-            text = page.get_text().strip()
+            text = page.get_text().replace("\x00", "").strip()
             if text:
                 pages.append((i + 1, text))
     return pages
@@ -32,7 +36,7 @@ def chunk_pages(
     step = size - overlap
     chunks: list[Chunk] = []
     for page_num, text in pages:
-        words = text.split()
+        words = clean_text(text).split()
         start = 0
         while start < len(words):
             end = min(start + size, len(words))

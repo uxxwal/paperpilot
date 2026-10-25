@@ -2,7 +2,7 @@ import itertools
 
 import pytest
 
-from paperpilot.ingest import chunk_pages
+from paperpilot.ingest import chunk_pages, clean_text
 
 
 def make_text(n: int, prefix: str = "w") -> str:
@@ -52,3 +52,13 @@ def test_no_pages_returns_no_chunks():
     pages = [(1, "")]
     chunks = chunk_pages(pages, size=250, overlap=40)
     assert chunks == []
+
+
+def test_chunking_survives_nul_bytes():
+    pages = [(1, "hello\x00 world")]
+    chunks = chunk_pages(pages)
+    assert "\x00" not in chunks[0].text
+
+
+def test_clean_text_removes_nul():
+    assert clean_text("hello\x00 world") == "hello world"

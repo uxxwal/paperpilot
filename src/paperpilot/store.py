@@ -15,11 +15,15 @@ class Status(StrEnum):
 
 
 def insert_paper(
-    conn: psycopg.Connection, title: str, source: str, file_hash: str | None = None
+    conn: psycopg.Connection,
+    title: str,
+    source: str,
+    file_hash: str | None = None,
+    file_path: str | None = None,
 ) -> int:
     row = conn.execute(
-        "INSERT INTO papers (title, source, file_hash) VALUES (%s, %s, %s) RETURNING id",
-        (title, source, file_hash),
+        "INSERT INTO papers (title, source, file_hash, file_path) VALUES (%s, %s, %s, %s) RETURNING id",
+        (title, source, file_hash, file_path),
     ).fetchone()
     return row[0]
 

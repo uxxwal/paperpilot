@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS papers (
     source TEXT NOT NULL CHECK (source IN ('upload', 'zotero')),
     zotero_key TEXT UNIQUE,
     file_hash TEXT UNIQUE,
+    file_path TEXT,
     status TEXT NOT NULL DEFAULT 'PENDING' CHECK (status IN ('PENDING', 'PROCESSING', 'COMPLETED', 'FAILED')),
     error TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()

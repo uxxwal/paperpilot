@@ -15,6 +15,7 @@ def file_sha256(path: str) -> str:
             h.update(block)
     return h.hexdigest()
 
+
 def register_paper(pdf_path: str, title: str) -> tuple[int, str]:
     """Phase 1: Create the paper row as PENDING (or return the exisiting one)"""
     file_hash = file_sha256(pdf_path)
@@ -24,8 +25,12 @@ def register_paper(pdf_path: str, title: str) -> tuple[int, str]:
         ).fetchone()
         if existing:
             return existing[0], existing[1]
-        paper_id = insert_paper(conn, title, source="upload", file_hash=file_hash)
+        paper_id = insert_paper(
+            conn, title, source="upload", file_hash=file_hash, file_path=pdf_path
+        )
         return paper_id, Status.PENDING
+
+
 def process_paper(paper_id: int, pdf_path: str) -> None:
     """Phase 2: extract, chunk, embed, store. Mark COMPLETED or FAILED."""
     with get_conn() as conn:
@@ -44,13 +49,15 @@ def process_paper(paper_id: int, pdf_path: str) -> None:
             set_status(conn, paper_id, Status.FAILED, error=str(e))
         raise
 
-def ingest_pdf(pdf_path: str, title:str) -> int:
+
+def ingest_pdf(pdf_path: str, title: str) -> int:
     """Register and process a PDF end to end. Returns the paper id."""
     paper_id, status = register_paper(pdf_path, title)
     if status == Status.COMPLETED:
         return paper_id
     process_paper(paper_id, pdf_path)
     return paper_id
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Ingest a PDF into Paperpilot")
